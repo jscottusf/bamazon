@@ -65,7 +65,7 @@ function orderPrompt() {
         inquirer.prompt([
                 {
                     type: 'list',
-                    question: 'Which product would you like to order of?',
+                    question: 'Select product to order',
                     choices: function() {
                         var products = [];
                         for (var i = 0; i < res.length; i++) {
@@ -77,25 +77,116 @@ function orderPrompt() {
                 },
                 {
                     type: 'input',
-                    
+                    question: 'Enter the amount of units to order',
+                    validate: function(value) {
+                        if (isNaN(value) === false && parseFloat(value) > 0) {
+                            return true;
+                        }
+                        return false;
+                    },
+                    name: 'quantity'
                 }
             ])
             .then(function(ans) {
                 console.log(ans.order);
                 var orderItem;
+                var quantity = parseFloat(ans.quantity);
                 for (var i = 0; i < res.length; i++) {
                     if (res[i].product_name === ans.order) {
                         orderItem = res[i];
+                        quantity += res[i].stock_quantity;
                     }
                 }
-                orderInventory(orderItem);
+                orderInventory(orderItem, quantity);
             });
     });   
 }
 
-function orderInventory(product) {
-    connection.query('')
+function orderInventory(orderItem, quantity) {
+    connection.query(
+        'UPDATE products SET ? WHERE ?',
+        [
+            {
+                stock_quantity: quantity
+            },
+            {
+                id: orderItem.id
+            }
+        ], function (err, res) {
+            if (err) throw err;
+            console.log(orderItem.product_name + ' inventory updated to ' + quantity);
+            setTimeout(promptUser, 1000);
+        }
+
+        );
 }
 
+function newProduct() {
+    console.clear();
+    inquirer 
+        .prompt([
+            {
+                type: 'input',
+                message: 'Enter product name',
+                validate: function(value) {
+                    if (isNaN(value)) {
+                        return true;
+                    }
+                    return false;
+                },
+                name: 'newName'
+            },
+            {
+                type: 'input',
+                message: 'Enter product department',
+                validate: function(value) {
+                    if (isNaN(value)) {
+                        return true;
+                    }
+                    return false;
+                },
+                name: 'newDept'
+            },
+            {
+                type: 'input',
+                message: 'Enter product price',
+                validate: function(value) {
+                    if (isNaN(value) === false && parseFloat(value) > 0) {
+                        return true;
+                    }
+                    return false;
+                },
+                name: 'price'
+            },
+            {
+                type: 'input',
+                message: 'Enter order quantity',
+                validate: function(value) {
+                    if (isNaN(value) === false && parseFloat(value) > 0) {
+                        return true;
+                    }
+                    return false;
+                },
+                name: 'quantity'
+            }
+        ])
+        .then(function(ans) {
+            var price = ans.price;
+            connection.query(
+                'INSERT INTO products SET ?',
+                {
+                    product_name: ans.newName,
+                    department_name: ans.newDept,
+                    price: price,
+                    stock_quantity: ans.quantity
+                }, function(err, res) {
+                    if (err) throw err;
+                    console.log(ans.newName + ' added to inventory\n');
+                    setTimeout(promptUser, 1000);
+                }
+            )
+        });
+}
 
+console.clear();
 promptUser();

@@ -70,7 +70,7 @@ function promptUser() {
                         function(err) {
                             if (err) throw err;
                             console.clear();
-                            console.log('\nOrder submitted for ' + orderItem.product_name + '.\nQuantity ordered: ' + quantity + '.\nOrder Total: ' + (orderItem.price * quantity) + '\n');
+                            console.log('\nOrder submitted for ' + orderItem.product_name + '.\nQuantity ordered: ' + quantity + '.\nOrder Total: ' + (orderItem.price * quantity).toFixed(2) + '\n');
                             setTimeout(promptUser, 1000);
                         }
                     )
