@@ -1,6 +1,14 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql');
 const cTable = require('console.table');
+let productsArr;
+let productsObj;
+let totalSales;
+let salePrice;
+let orderItem;
+let stockQuantity;
+let productID;
+let quantity;
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -13,7 +21,12 @@ const connection = mysql.createConnection({
 function promptUser() {  
     connection.query('SELECT * FROM products', function(err, res) {
         if (err) throw err;
-        console.table(res);
+        productsArr = [];
+        for (var i = 0; i < res.length; i++) {
+            productsObj = {ID: res[i].id, Name: res[i].product_name, Price: res[i].price, Quantity: res[i].stock_quantity};
+            productsArr.push(productsObj);
+        }
+        console.table(productsArr);
         var exit = res.length + 1;
         console.log(exit + ') Exit program\n');
         inquirer
@@ -47,21 +60,26 @@ function promptUser() {
                 }
             ])
             .then(function(ans) {
-                var productID = parseFloat(ans.item);
-                var quantity = parseFloat(ans.quantity);
-                var orderItem;
+                productID = parseFloat(ans.item);
+                quantity = parseFloat(ans.quantity);
                 for (var i = 0; i < res.length; i++) {
                     if (res[i].id === productID) {
                         orderItem = res[i];
                     }
                 }
+                totalSales = orderItem.product_sales;
+                salePrice = orderItem.price * quantity;
+                totalSales += salePrice;
                 if (quantity <= orderItem.stock_quantity) {
-                    var stockQuantity = orderItem.stock_quantity - quantity;
+                    stockQuantity = orderItem.stock_quantity - quantity;
                     connection.query(
-                        'UPDATE products SET ? WHERE ?',
+                        'UPDATE products SET ?,? WHERE ?',
                         [
                             {
                                 stock_quantity: stockQuantity
+                            }, 
+                            {
+                                product_sales: totalSales
                             },
                             {
                                 id: productID
