@@ -98,7 +98,6 @@ function promptUser() {
                     console.log('\nNot enough in stock\nProduct: ' + orderItem.product_name + '\nQuantity available: ' + orderItem.stock_quantity + '\n');
                     setTimeout(promptUser, 1000);
                 }
-                //connection.end();
             })
     });
 }
