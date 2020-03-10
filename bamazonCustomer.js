@@ -42,7 +42,6 @@ function promptUser() {
                             }
                             return true;
                         }
-                        
                         return false;
                     },
                     name: 'item'

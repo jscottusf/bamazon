@@ -63,42 +63,42 @@ function orderPrompt() {
     connection.query('SELECT * FROM products', function(err, res) {
         if (err) throw err;
         inquirer.prompt([
-                {
-                    type: 'list',
-                    question: 'Select product to order',
-                    choices: function() {
-                        var products = [];
-                        for (var i = 0; i < res.length; i++) {
-                            products.push(res[i].product_name);
-                        }
-                        return products;
-                    },
-                    name: 'order'
-                },
-                {
-                    type: 'input',
-                    question: 'Enter the amount of units to order',
-                    validate: function(value) {
-                        if (isNaN(value) === false && parseFloat(value) > 0) {
-                            return true;
-                        }
-                        return false;
-                    },
-                    name: 'quantity'
-                }
-            ])
-            .then(function(ans) {
-                console.log(ans.order);
-                var orderItem;
-                var quantity = parseFloat(ans.quantity);
-                for (var i = 0; i < res.length; i++) {
-                    if (res[i].product_name === ans.order) {
-                        orderItem = res[i];
-                        quantity += res[i].stock_quantity;
+            {
+                type: 'list',
+                question: 'Select product to order',
+                choices: function() {
+                    var products = [];
+                    for (var i = 0; i < res.length; i++) {
+                        products.push(res[i].product_name);
                     }
+                    return products;
+                },
+                name: 'order'
+            },
+            {
+                type: 'input',
+                question: 'Enter the amount of units to order',
+                validate: function(value) {
+                    if (isNaN(value) === false && parseFloat(value) > 0) {
+                        return true;
+                    }
+                    return false;
+                },
+                name: 'quantity'
+            }
+        ])
+        .then(function(ans) {
+            console.log(ans.order);
+            var orderItem;
+            var quantity = parseFloat(ans.quantity);
+            for (var i = 0; i < res.length; i++) {
+                if (res[i].product_name === ans.order) {
+                    orderItem = res[i];
+                    quantity += res[i].stock_quantity;
                 }
-                orderInventory(orderItem, quantity);
-            });
+            }
+            orderInventory(orderItem, quantity);
+        });
     });   
 }
 
@@ -178,7 +178,8 @@ function newProduct() {
                     product_name: ans.newName,
                     department_name: ans.newDept,
                     price: price,
-                    stock_quantity: ans.quantity
+                    stock_quantity: ans.quantity,
+                    product_sales: 0
                 }, function(err, res) {
                     if (err) throw err;
                     console.log(ans.newName + ' added to inventory\n');
